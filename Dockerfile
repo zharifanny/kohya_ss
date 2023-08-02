@@ -26,8 +26,10 @@ RUN python3 -m pip install wheel
 ## RUN python3 -m pip install -v -U git+https://github.com/facebookresearch/xformers.git@main#egg=xformers
 
 # Install requirements
-COPY requirements_unix.txt setup.py ./
-RUN python3 -m pip install --use-pep517 -r requirements_unix.txt xformers
+COPY ./requirements.txt ./requirements_linux_docker.txt ./
+COPY ./setup/docker_setup.py ./setup.py
+RUN python3 -m pip install -r ./requirements_linux_docker.txt
+RUN python3 -m pip install -r ./requirements.txt
 
 # Replace pillow with pillow-simd
 RUN python3 -m pip uninstall -y pillow && \
@@ -45,5 +47,6 @@ COPY --chown=appuser . .
 
 STOPSIGNAL SIGINT
 ENV LD_PRELOAD=libtcmalloc.so
+ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 ENV PATH="$PATH:/home/appuser/.local/bin"
 CMD python3 "./kohya_gui.py" ${CLI_ARGS} --listen 0.0.0.0 --server_port 7860
